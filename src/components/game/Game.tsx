@@ -12,10 +12,11 @@ import {
 import { useGameContext } from "../../state/GameContext";
 
 import { TURN_DURATION } from "../../utils/constant";
+import { GameOpponent } from "../../state/GameTypes";
 
 const Game: React.FC = () => {
   const {
-    state: { isListening, isGameOver, message, turnList, score, timer },
+    state: { isListening, isGameOver, message, winner, turnList, score, timer },
     actions: gameActions,
   } = useGameContext();
   const [playerWord, setPlayerWord] = useState("");
@@ -39,9 +40,13 @@ const Game: React.FC = () => {
   return (
     <Container className="game mt-5">
       <h1>Word Runner Game</h1>
-      <p>
-        Try to come up with a word that starts with the last letter of the given
-        word within {TURN_DURATION} seconds.
+      <p className="text-center">
+      Try to come up with a word that starts with the last letter of the given
+      word within a specified time limit. Be careful not to repeat words that
+      have already been used. The game will provide you with a timer indicating
+      the remaining time to come up with a word. Once the timer reaches zero,
+      the game will end. You can restart the game by clicking the 'Restart Game'
+      button.
       </p>
       <Button
         variant="success"
@@ -78,10 +83,10 @@ const Game: React.FC = () => {
           <h5>Time Remaining: {timer} seconds</h5>
         </div>
       )}
-      <div className="game-turn-list">
+      <div className="game-turn-list mt-3">
         <h3>Word List</h3>
         <ul>
-          {turnList.map((turn, index) => (
+          {turnList.slice().reverse().map((turn, index) => (
             <li key={index}>
               <strong>{turn.word}</strong>
               <br />
@@ -91,9 +96,12 @@ const Game: React.FC = () => {
         </ul>
       </div>
       {isGameOver && (
-        <Alert variant="danger" className="mt-4">
+        <Alert
+          variant={winner === GameOpponent.COMPUTER ? "danger" : "success"}
+          className="mt-4 text-center"
+        >
           {message}
-          <p>Your Score: {Math.max(score - 1, 0)}</p>
+          <h5>Your Score: {score}</h5>
         </Alert>
       )}
     </Container>

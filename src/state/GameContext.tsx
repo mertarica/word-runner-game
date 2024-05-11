@@ -10,7 +10,7 @@ import {
   Turn,
 } from "./GameTypes";
 import names from "../../names.json";
-import { TURN_DURATION } from "../utils/constant";
+import { TURN_DURATION, MISTAKE_RATE } from "../utils/constant";
 
 const getRandomWord = (): string => {
   const randomIndex = Math.floor(Math.random() * names.length);
@@ -37,10 +37,27 @@ class ContextActions implements GameActions {
     this.dispatch({ type: GameAction.START_GAME });
   }
   endGame() {
-    this.dispatch({ type: GameAction.END_GAME });
+    this.dispatch({
+      type: GameAction.END_GAME,
+      payload: {
+        winner: GameOpponent.COMPUTER,
+        message: "You ran out of time! Computer won the game.",
+      },
+    });
   }
   computerMove(lastWord: string) {
     let computerWord = getRandomWord();
+    const isMistake = Math.random() < MISTAKE_RATE;
+    if (isMistake) {
+      this.dispatch({
+        type: GameAction.END_GAME,
+        payload: {
+          winner: GameOpponent.PLAYER,
+          message: "Computer made a mistake! You won the game.",
+        },
+      });
+      return;
+    }
     while (
       !checkAnswer(computerWord, [
         ...this.state.turnList,
@@ -62,7 +79,13 @@ class ContextActions implements GameActions {
     if (checkAnswer(word, this.state.turnList)) {
       this.computerMove(word);
     } else {
-      this.dispatch({ type: GameAction.END_GAME });
+      this.dispatch({
+        type: GameAction.END_GAME,
+        payload: {
+          winner: GameOpponent.COMPUTER,
+          message: "You made a mistake! Computer won the game.",
+        },
+      });
     }
   }
   setTimer(remainingTime: number) {
@@ -78,6 +101,7 @@ const reducer = (state: GameState, action: Action): GameState => {
         isListening: true,
         isGameOver: false,
         message: "",
+        winner: null,
         score: 0,
         timer: TURN_DURATION,
         turnList: [{ word: getRandomWord(), by: GameOpponent.COMPUTER }],
@@ -94,11 +118,13 @@ const reducer = (state: GameState, action: Action): GameState => {
       };
     }
     case GameAction.END_GAME: {
+      const { message, winner } = action.payload;
       return {
         ...state,
         isListening: false,
         isGameOver: true,
-        message: "Game Over! You lost the game.",
+        message,
+        winner,
       };
     }
     case GameAction.SET_TIMER: {
@@ -122,6 +148,7 @@ const createInitialContext = (): GameContextType => {
       score: 0,
       turnList: [],
       message: "",
+      winner: null,
     },
     actions: {} as ContextActions,
     dispatch: () => Object,

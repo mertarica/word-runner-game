@@ -7,6 +7,7 @@ export type GameState = {
   timer: number;
   turnList: Turn[];
   message: string;
+  winner?: GameOpponent | null;
 };
 
 export interface Turn {
@@ -36,7 +37,10 @@ export type GameActions = {
 
 export type Action =
   | { type: GameAction.START_GAME }
-  | { type: GameAction.END_GAME; }
+  | {
+      type: GameAction.END_GAME;
+      payload: { winner: GameOpponent; message: string };
+    }
   | { type: GameAction.ADD_TURN; payload: { word: string; by: GameOpponent } }
   | { type: GameAction.SET_TIMER; payload: { remainingTime: number } };
 

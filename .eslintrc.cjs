@@ -20,7 +20,7 @@ module.exports = {
     "no-extra-semi": "warn", // Warns about unnecessary semicolons
     "no-empty": "error", // Throws an error for empty blocks/statements
     "no-multiple-empty-lines": ["warn", { max: 2 }], // Warns about multiple empty lines
-    indent: ["warn", 2], // Warns about incorrect indentation (2 spaces)
+    indent: ["warn", 2, { "SwitchCase": 1 }], // Warns about incorrect indentation (2 spaces)
     semi: ["warn", "always"], // Warns about missing semicolons
     quotes: ["warn", "double"], // Warns about using double quotes instead of single quotes
   },

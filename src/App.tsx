@@ -1,10 +1,10 @@
 import { Container, Row, Col } from "react-bootstrap";
 import Game from "./components/game/Game";
-import { GameProvider } from "./state/GameContext";
+import { GameContextProvider } from "./state/GameContext";
 
 export default function App() {
   return (
-    <GameProvider>
+    <GameContextProvider>
       <Container>
         <Row className="justify-content-center">
           <Col xs={12} md={8}>
@@ -12,6 +12,6 @@ export default function App() {
           </Col>
         </Row>
       </Container>
-    </GameProvider>
+    </GameContextProvider>
   );
 }

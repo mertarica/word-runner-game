@@ -1,23 +1,40 @@
 import React, { useState, useEffect } from "react";
-import { Button, Container, Form, Row, Col, Alert } from "react-bootstrap";
+import {
+  Button,
+  Container,
+  Form,
+  Row,
+  Col,
+  Alert,
+  InputGroup,
+} from "react-bootstrap";
+
+import { useGameContext } from "../../state/GameContext";
+
 import { TURN_DURATION } from "../../utils/constant";
 
-interface Turn {
-  word: string;
-  by: string;
-}
-
 const Game: React.FC = () => {
-  const [wordList, setWordList] = useState<Turn[]>([
-    { word: "test 1", by: "Computer" },
-    { word: "test 2", by: "Player" },
-    { word: "test 3", by: "Computer" },
-    { word: "test 4", by: "Player" },
-    { word: "test 5", by: "Computer" },
-    { word: "test 6", by: "Player" },
-    { word: "test 7", by: "Computer" },
-  ]);
-  const [timer, setTimer] = useState(TURN_DURATION);
+  const {
+    state: { isListening, isGameOver, message, turnList, score, timer },
+    actions: gameActions,
+  } = useGameContext();
+  const [playerWord, setPlayerWord] = useState("");
+
+  useEffect(() => {
+    if (timer > 0 && isListening) {
+      const interval = setInterval(() => {
+        gameActions.setTimer(timer - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else if (timer === 0 && isListening) {
+      gameActions.endGame();
+    }
+  }, [timer, isListening]);
+
+  const handleInput = () => {
+    gameActions.playerMove(playerWord);
+    setPlayerWord("");
+  };
 
   return (
     <Container className="game mt-5">
@@ -26,31 +43,45 @@ const Game: React.FC = () => {
         Try to come up with a word that starts with the last letter of the given
         word within {TURN_DURATION} seconds.
       </p>
-      <Button variant="success" className="mx-2" onClick={() => {}}>
-        Start Game
+      <Button
+        variant="success"
+        className="mx-2"
+        onClick={() => gameActions.startGame()}
+      >
+        {isListening || isGameOver ? "Restart Game" : "Start Game"}
       </Button>
-      <div className="mt-4">
-        <Form onSubmit={(event) => console.log(event)}>
-          <Form.Group as={Row} controlId="playerWord">
-            <Form.Label column sm={3}>
-              Your Word:
-            </Form.Label>
-            <Col sm={6}>
-              <Form.Control type="text" />
+      {isListening && (
+        <div className="mt-4">
+          <Row>
+            <Col sm={9}>
+              <InputGroup className="mb-3">
+                <InputGroup.Text id="basic-addon3">Your Word:</InputGroup.Text>
+                <Form.Control
+                  value={playerWord}
+                  onChange={(e) => setPlayerWord(e.target.value)}
+                  aria-describedby="basic-addon3"
+                />
+              </InputGroup>
             </Col>
             <Col sm={3}>
-              <Button type="submit" variant="primary" className="mx-2">
-                Speak
+              <Button
+                type="submit"
+                variant="primary"
+                className="mx-2"
+                disabled={isGameOver}
+                onClick={handleInput}
+              >
+                Enter
               </Button>
             </Col>
-          </Form.Group>
-        </Form>
-        <h5>Time Remaining: {timer} seconds</h5>
-      </div>
+          </Row>
+          <h5>Time Remaining: {timer} seconds</h5>
+        </div>
+      )}
       <div className="game-turn-list">
         <h3>Word List</h3>
         <ul>
-          {wordList.map((turn, index) => (
+          {turnList.map((turn, index) => (
             <li key={index}>
               <strong>{turn.word}</strong>
               <br />
@@ -59,9 +90,12 @@ const Game: React.FC = () => {
           ))}
         </ul>
       </div>
-      <Alert variant="danger" className="mt-4">
-        Game Over! <br /> Your score is 0.
-      </Alert>
+      {isGameOver && (
+        <Alert variant="danger" className="mt-4">
+          {message}
+          <p>Your Score: {Math.max(score - 1, 0)}</p>
+        </Alert>
+      )}
     </Container>
   );
 };

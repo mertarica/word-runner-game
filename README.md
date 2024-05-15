@@ -15,14 +15,40 @@ Tasarım burada hiç önemli değil. Sadece oynayan kullanıcının kelimeyi tü
 Oyunun akışı şu şekilde olacak;
 
 - Oyuna başla
+
 - Mikrofon kullanımı için izin iste
+
 - Bilgisayar için rastgele bir kelime seç ve ekranda göster (Örnek: Ahmet)
+
 - Kullanıcının mikrofonunu dinle ve 8 saniye içinde ondan T harfi ile başlayan bir isim bekle
+
 Kullanıcı doğru bir isim söylediyse; tekrar bilgisayarın seçtiği kelimeyi ekranda göster ve timerı başlat. (Burada istersen bilgisayara rastgele bir düşünme aralığı ayarlayabilirsin, kelime anında ekranda gözükmeyebilir.)
+
 - Kullanıcı yanlış bir isim söylediyse; oyunu kaybettin diye göster ve zincirde kaç kelime ilerlerdiklerini göster,
+
 - Kullanıcı daha önce söylenmiş bir isim söylediyse; oyunu kaybettin diye göster ve zincirde kaç kelime ilerlerdiklerini göster,
+
 - Bilgisayar da %30 oranında kelime hatırlayamayabilir dolayısıyla oyuncu oyunu kazanabilir. Bu durumda oyunu kazandın diye göster ve zincirde kaç kelime ilerlerdiklerini göster.
 
 Kullanacağın isim veritabanını repo içinde bulabilirsin.
 
 > Cevabın hazır olduğu zaman bu repo'ya çözümü `push` edebilirsin. Böylece çözümün bize ulaşmış olacak ve biz de inceleyip sonucu seninle paylaşacağız.
+
+## Table of Contents
+
+- [Installation](#installation)
+
+- [Usage](#usage)
+
+## Installation
+
+Clone the repository.
+
+- To install dependencies: `npm i`
+- To run app: `npm run dev`
+- To run unit tests: `npm run test`
+- To run linter: `npm run lint`
+
+## Usage
+
+Try to come up with a word that starts with the last letter of the given word within a specified time limit. Be careful not to repeat words that have already been used. The game will provide you with a timer indicating the remaining time to come up with a word. Once the timer reaches zero, the game will end. You can restart the game by clicking the 'Restart Game' button.

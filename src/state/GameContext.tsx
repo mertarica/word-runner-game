@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useReducer } from "react";
+import React, { createContext, useMemo, useReducer } from "react";
 import type { Dispatch } from "react";
 import {
   GameState,
@@ -27,29 +27,27 @@ const checkAnswer = (word: string, list: Turn[]): boolean => {
   return !isWordUsedBefore && isLastCharMatch;
 };
 
-class ContextActions implements GameActions {
-  constructor(
-    private readonly state: GameState,
-    private readonly dispatch: Dispatch<Action>
-  ) {}
-
+const GameContextActions = (
+  state: GameState,
+  dispatch: Dispatch<Action>
+): GameActions => ({
   startGame() {
-    this.dispatch({ type: GameAction.START_GAME });
-  }
+    dispatch({ type: GameAction.START_GAME });
+  },
   endGame() {
-    this.dispatch({
+    dispatch({
       type: GameAction.END_GAME,
       payload: {
         winner: GameOpponent.COMPUTER,
         message: "You ran out of time! Computer won the game.",
       },
     });
-  }
+  },
   computerMove(lastWord: string) {
     let computerWord = getRandomWord();
     const isMistake = Math.random() < MISTAKE_RATE;
     if (isMistake) {
-      this.dispatch({
+      dispatch({
         type: GameAction.END_GAME,
         payload: {
           winner: GameOpponent.PLAYER,
@@ -60,26 +58,26 @@ class ContextActions implements GameActions {
     }
     while (
       !checkAnswer(computerWord, [
-        ...this.state.turnList,
+        ...state.turnList,
         { word: lastWord, by: GameOpponent.PLAYER },
       ])
     ) {
       computerWord = getRandomWord();
     }
-    this.dispatch({
+    dispatch({
       type: GameAction.ADD_TURN,
       payload: { word: computerWord, by: GameOpponent.COMPUTER },
     });
-  }
+  },
   playerMove(word: string) {
-    this.dispatch({
+    dispatch({
       type: GameAction.ADD_TURN,
       payload: { word, by: GameOpponent.PLAYER },
     });
-    if (checkAnswer(word, this.state.turnList)) {
+    if (checkAnswer(word, state.turnList)) {
       this.computerMove(word);
     } else {
-      this.dispatch({
+      dispatch({
         type: GameAction.END_GAME,
         payload: {
           winner: GameOpponent.COMPUTER,
@@ -87,13 +85,13 @@ class ContextActions implements GameActions {
         },
       });
     }
-  }
+  },
   setTimer(remainingTime: number) {
-    this.dispatch({ type: GameAction.SET_TIMER, payload: { remainingTime } });
-  }
-}
+    dispatch({ type: GameAction.SET_TIMER, payload: { remainingTime } });
+  },
+});
 
-const reducer = (state: GameState, action: Action): GameState => {
+const GameContextReducer = (state: GameState, action: Action): GameState => {
   switch (action.type) {
     case GameAction.START_GAME: {
       return {
@@ -150,7 +148,7 @@ const createInitialContext = (): GameContextType => {
       message: "",
       winner: null,
     },
-    actions: {} as ContextActions,
+    actions: {} as GameActions,
     dispatch: () => Object,
   };
 };
@@ -159,31 +157,29 @@ interface ProviderProps {
   children: React.ReactNode;
 }
 const initialContext: GameContextType = createInitialContext();
-const Context = createContext<GameContextType | null>(initialContext);
+const GameContext = createContext<GameContextType | null>(initialContext);
 
 function GameContextProvider({ children }: ProviderProps) {
-  const [state, dispatch] = useReducer(reducer, { ...initialContext.state });
+  const [state, dispatch] = useReducer(GameContextReducer, {
+    ...initialContext.state,
+  });
 
   const contextValue: GameContextType = useMemo(() => {
     return {
       state,
-      actions: new ContextActions(state, dispatch),
+      actions: GameContextActions(state, dispatch),
       dispatch,
     };
   }, [state]);
 
-  return <Context.Provider value={contextValue}>{children}</Context.Provider>;
+  return (
+    <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>
+  );
 }
 
-const useGameContext = () => {
-  const context = useContext(Context);
-  if (context == null) {
-    throw new Error(
-      "usePaymentContext must be used within a PaymentContextProvider"
-    );
-  }
-  return context;
+export {
+  GameContextActions,
+  GameContextReducer,
+  GameContextProvider,
+  GameContext,
 };
-
-// eslint-disable-next-line react-refresh/only-export-components
-export { GameContextProvider, useGameContext };

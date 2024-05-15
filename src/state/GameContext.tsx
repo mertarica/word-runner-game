@@ -19,11 +19,11 @@ const getRandomWord = (): string => {
 
 const checkAnswer = (word: string, list: Turn[]): boolean => {
   const isWordUsedBefore = list.some(
-    (turn) => turn.word.toLowerCase() === word.toLowerCase()
+    (turn) => turn.word.toLocaleLowerCase() === word.toLocaleLowerCase()
   );
   const isLastCharMatch =
-    word.charAt(0).toLowerCase() ===
-    list[list.length - 1].word.slice(-1).toLowerCase();
+    word.charAt(0).toLocaleLowerCase() ===
+    list[list.length - 1].word.slice(-1).toLocaleLowerCase();
   return !isWordUsedBefore && isLastCharMatch;
 };
 
@@ -102,7 +102,9 @@ const GameContextReducer = (state: GameState, action: Action): GameState => {
         winner: null,
         score: 0,
         timer: TURN_DURATION,
-        turnList: [{ word: getRandomWord(), by: GameOpponent.COMPUTER }],
+        turnList: [
+          { word: getRandomWord(), by: GameOpponent.COMPUTER },
+        ],
       };
     }
     case GameAction.ADD_TURN: {

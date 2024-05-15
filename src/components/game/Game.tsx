@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Button,
   Container,
@@ -20,6 +20,7 @@ const Game: React.FC = () => {
     actions: gameActions,
   } = useGameContext();
   const [playerWord, setPlayerWord] = useState("");
+  const gameList = useRef<HTMLUListElement>(null);
 
   const { listening, startListening, stopListening, transcript } =
     useSpeechRecognition();
@@ -50,33 +51,37 @@ const Game: React.FC = () => {
     return () => clearTimeout(debounce);
   }, [playerWord]);
 
+  useEffect(() => {
+    if (gameList.current) {
+      gameList.current.scrollTop = gameList.current.scrollHeight;
+    }
+  }, [turnList]);
+
   return (
-    <Container className="game mt-5">
-      <h1>Word Runner Game</h1>
-      <p id="game-description" className="text-center">
-        Try to come up with a word that starts with the last letter of the given
-        word within a specified time limit. Be careful not to repeat words that
-        have already been used. The game will provide you with a timer
-        indicating the remaining time to come up with a word. Once the timer
-        reaches zero, the game will end. You can restart the game by clicking
-        the 'Restart Game' button.
-      </p>
-      <Button
-        id="start-game-button"
-        variant="success"
-        className="mx-2"
-        onClick={() => {
-          gameActions.startGame();
-          setPlayerWord("");
-        }}
-      >
-        {isListening || isGameOver ? "Restart Game" : "Start Game"}
-      </Button>
+    <Container className="game">
+      <div className="game-header">
+        <h1>Word Runner Game</h1>
+        <p id="game-description" className="text-center d-none d-sm-block" >
+          Try to think of a word starting with the last letter of the given word
+          within a time limit. Avoid repeating words. The game has a timer; when
+          it reaches zero, the game ends. Click 'Restart Game' to start over.
+        </p>
+        <Button
+          id="start-game-button"
+          variant="success"
+          onClick={() => {
+            gameActions.startGame();
+            setPlayerWord("");
+          }}
+        >
+          {isListening || isGameOver ? "Restart Game" : "Start Game"}
+        </Button>
+      </div>
       {isListening && (
-        <div className="mt-4">
+        <div className="game-controllers">
           <Row>
-            <Col sm={9}>
-              <InputGroup className="mb-3">
+            <Col xs={9}>
+              <InputGroup>
                 <InputGroup.Text id="input-label">Your Word:</InputGroup.Text>
                 <Form.Control
                   id="player-word-input"
@@ -86,7 +91,7 @@ const Game: React.FC = () => {
                 />
               </InputGroup>
             </Col>
-            <Col sm={3}>
+            <Col xs={3}>
               <div className="translate-input-tools">
                 <Button
                   variant="primary"
@@ -99,30 +104,34 @@ const Game: React.FC = () => {
               </div>
             </Col>
           </Row>
-          <h5>Time Remaining: {timer} seconds</h5>
+          <h5 className="mt-3">Time Remaining: {timer} seconds</h5>
         </div>
       )}
-      <div className="game-turn-list mt-3">
-        <h3>Word List</h3>
-        <ul>
-          {turnList.map((turn, index) => (
-            <li key={index}>
-              <strong>{turn.word}</strong>
-              <br />
-              <small>by {turn.by}</small>
-            </li>
-          ))}
-        </ul>
-      </div>
       {isGameOver && (
-        <Alert
-          variant={winner === GameOpponent.COMPUTER ? "danger" : "success"}
-          className="mt-4 text-center"
-          id="game-over-alert"
-        >
-          {message}
-          <h5>Your Score: {score}</h5>
-        </Alert>
+        <div className="game-result">
+          <Alert
+            variant={winner === GameOpponent.COMPUTER ? "danger" : "success"}
+            className="text-center"
+            id="game-over-alert"
+          >
+            {message}
+            <h5>Your Score: {score}</h5>
+          </Alert>
+        </div>
+      )}
+      {turnList.length > 0 && (
+        <div className="game-turn-list">
+          <h3>Word List</h3>
+          <ul ref={gameList}>
+            {turnList.map((turn, index) => (
+              <li key={index}>
+                <strong>{turn.word}</strong>
+                <br />
+                <small>by {turn.by}</small>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </Container>
   );

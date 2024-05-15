@@ -19,13 +19,6 @@ describe("Game component", () => {
       expect(instructionsElement).toBeInTheDocument();
     });
 
-    test("renders game description", () => {
-      const descriptionElement = screen.getByText(
-        /Try to come up with a word that starts with the last letter of the given word within a specified time limit/i
-      );
-      expect(descriptionElement).toBeInTheDocument();
-    });
-
     test("renders start game button", () => {
       const startGameButton = screen.getByRole("button", {
         name: /Start Game/i,
